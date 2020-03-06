@@ -12,6 +12,11 @@ io.on("connection", client => {
       });
     }
 
+    client.broadcast.to(data.room).emit(
+        "createMenssage",
+        createMenssage("Admin", `${data.name} se unió al chat.`)
+      );
+
     client.join(data.room);
 
     user.addPerson(client.id, data.name, data.room);
@@ -21,10 +26,12 @@ io.on("connection", client => {
     callback(user.getPersonsForRoom(data.room));
   });
 
-  client.on("createMenssage", data => {
+  client.on("createMenssage", (data, callback) => {
     let person = user.getPerson(client.id);
     let menssage = createMenssage(person.name, data.menssage);
-    client.broadcast.to(person.data).emit("createMenssage", menssage);
+    client.broadcast.to(person.room).emit("createMenssage", menssage);
+    
+    callback(menssage);
   });
 
   client.on("disconnect", () => {
